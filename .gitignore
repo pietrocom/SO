@@ -1,0 +1,61 @@
+# Arquivos objeto e código pré-compilado
+*.o
+*.obj
+*.ko
+*.elf
+
+# Bibliotecas
+*.a
+*.la
+*.lo
+*.so
+*.so.*
+*.dylib
+*.dll
+*.lib
+
+# Executáveis
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+/bin/
+build/
+
+# Saída de depuração
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.stackdump
+core
+vgcore.*
+
+# Dependências geradas (Make)
+*.d
+
+# Cobertura de testes / profiling
+*.gcno
+*.gcda
+*.gcov
+gmon.out
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+
+# Editores / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
