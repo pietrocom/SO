@@ -1,0 +1,88 @@
+1 Testes com uma fila inexistente
+  teste queue_size
+  teste queue_destroy
+  teste queue_head
+  teste queue_next
+  teste queue_item
+  teste queue_add
+  teste queue_del
+  fila: undef
+2 Testes com uma fila existente mas vazia
+  teste queue_create
+  teste queue_size
+  teste queue_head
+  teste queue_next
+  teste queue_item
+  teste queue_del
+  fila: [ ] (0 items)
+3 Testes de inserção
+  colocando ameixa
+  fila: [ ameixa ] (1 items)
+  colocando banana
+  fila: [ ameixa banana ] (2 items)
+  colocando goiaba
+  fila: [ ameixa banana goiaba ] (3 items)
+  colocando laranja
+  fila: [ ameixa banana goiaba laranja ] (4 items)
+  colocando morango
+  fila: [ ameixa banana goiaba laranja morango ] (5 items)
+  colocando uva
+  fila: [ ameixa banana goiaba laranja morango uva ] (6 items)
+4 Testes do queue_print:
+  fila: undef
+  fila: [ undef undef undef undef undef undef ] (6 items)
+5 Testes do iterador:
+  iterador em ameixa (posição 0)
+  iterador em banana (posição 1)
+  iterador em goiaba (posição 2)
+  iterador em laranja (posição 3)
+  iterador em morango (posição 4)
+  iterador em uva (posição 5)
+  iterador em (null)
+6 Testes de remoção
+  retirando de fila NULL
+    fila antes : [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+    fila depois: [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+  retirando item NULL
+    fila antes : [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+    fila depois: [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+  retirando acerola (que não está na fila)
+    fila antes : [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+    fila depois: [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+  retirando laranja (no meio da fila)
+    fila antes : [ ameixa banana goiaba laranja morango uva ] (6 items)
+    iterador em ameixa
+    fila depois: [ ameixa banana goiaba morango uva ] (5 items)
+    iterador em ameixa
+  retirando ameixa (no início da fila)
+    fila antes : [ ameixa banana goiaba morango uva ] (5 items)
+    iterador em ameixa
+    fila depois: [ banana goiaba morango uva ] (4 items)
+    iterador em banana
+  retirando uva (no fim da fila)
+    fila antes : [ banana goiaba morango uva ] (4 items)
+    iterador em banana
+    fila depois: [ banana goiaba morango ] (3 items)
+    iterador em banana
+  retirando sob o iterador
+    fila antes : [ banana goiaba morango ] (3 items)
+    iterador em goiaba
+    fila depois: [ banana morango ] (2 items)
+    iterador em morango
+  retirando sob o iterador
+    fila antes : [ banana morango ] (2 items)
+    iterador em morango
+    fila depois: [ banana ] (1 items)
+    iterador em (null)
+7 Esvaziando a fila
+  fila: [ banana ] (1 items)
+  retirei banana
+  fila: [ ] (0 items)
+8 Teste queue_destroy
+Testes concluídos com sucesso!

@@ -1,0 +1,37 @@
+map: [ - - - - - ] (0/5)
+
+Object "banana" registered under ID 0
+map: [ * - - - - ] (1/5)
+Object "uva" registered under ID 1
+map: [ * * - - - ] (2/5)
+Object "morango" registered under ID 2
+map: [ * * * - - ] (3/5)
+Object "goiaba" registered under ID 3
+map: [ * * * * - ] (4/5)
+Object "laranja" registered under ID 4
+map: [ * * * * * ] (5/5)
+Object "pera" not registered
+map: [ * * * * * ] (5/5)
+
+Object under ID 0 is "banana"
+map: [ * * * * * ] (5/5)
+Object under ID 4 is "laranja"
+map: [ * * * * * ] (5/5)
+ID 5 is not associated to an object
+map: [ * * * * * ] (5/5)
+
+ID 3 deleted had object "goiaba"
+map: [ * * * - * ] (4/5)
+ID 1 deleted had object "uva"
+map: [ * - * - * ] (3/5)
+ID 5 is not associated to an object
+map: [ * - * - * ] (3/5)
+
+Object "melancia" registered under ID 1
+map: [ * * * - * ] (4/5)
+Object "pera" registered under ID 3
+map: [ * * * * * ] (5/5)
+Object "jaca" not registered
+map: [ * * * * * ] (5/5)
+
+Map destroyed
