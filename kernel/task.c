@@ -30,13 +30,24 @@ void task_init () {
     current_task = NULL;
     task_queue = queue_create();
     if (!task_queue) {
-        ppos_panic();
+        ppos_panic("Nao foi possivel criar a fila de tarefas.\n");
         return;
     }
 }
 
 void task_term () {
+    if (!task_queue) {
+        ppos_warn("Fila de tasks nao pode ser liberada: endereco invalido.");
+        return;
+    }
 
+    while (queue_head(task_queue) != NULL) {
+        void * item = queue_head(task_queue);
+        queue_del(task_queue, queue_head(task_queue));
+        mem_free(((struct task_t *)item)->stack_pointer);
+        mem_free(item);
+    }
+    queue_destroy(task_queue);
 }
 
 struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
@@ -52,15 +63,19 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         return NULL;
     }
 
+    task->stack_pointer = stack_pointer;
     task->name   = name;
     task->status = NEW;
-    task->id     = ids;
+    task->id     = ids; ids++;
     if (ctx_create(&task->context, entry, arg, stack_pointer, STACK_SIZE) == -1) {
         mem_free(task);
         mem_free(stack_pointer);
         
         return NULL;
     }
+    task->status = READY;
+
+    queue_add(task_queue, task);
 
     return task;
 }

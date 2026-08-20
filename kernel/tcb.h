@@ -28,6 +28,7 @@ struct task_t
     char * name;           // nome da tarefa
     struct ctx_t context;  // contexto da tarefa
     Status status;         // pronta, executando, ...
+    void * stack_pointer;
 };
 
 #endif
