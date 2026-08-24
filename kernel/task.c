@@ -17,9 +17,9 @@
 
 // --- Variaveis Globais ---
 
-static int ids;
+static int ids;                // Contador usado para setar os IDs das tasks
 struct task_t * current_task;  // Task que esta sendo executada
-struct queue_t * task_queue;
+struct task_t * kernel;        // Task inicial do kernel
 
 
 // --- Funcoes da API ---
@@ -27,27 +27,17 @@ struct queue_t * task_queue;
 void task_init () {
     // Inicializacoes
     ids = 0;
-    current_task = NULL;
-    task_queue = queue_create();
-    if (!task_queue) {
-        ppos_panic("Nao foi possivel criar a fila de tarefas.\n");
-        return;
-    }
+
+    kernel = mem_alloc(sizeof(struct task_t));
+    kernel->id = ids; ids++;
+    kernel->name = "kernel";
+    kernel->status = READY;
+
+    current_task = kernel;
 }
 
 void task_term () {
-    if (!task_queue) {
-        ppos_warn("Fila de tasks nao pode ser liberada: endereco invalido.");
-        return;
-    }
-
-    while (queue_head(task_queue) != NULL) {
-        void * item = queue_head(task_queue);
-        queue_del(task_queue, queue_head(task_queue));
-        mem_free(((struct task_t *)item)->stack_pointer);
-        mem_free(item);
-    }
-    queue_destroy(task_queue);
+    if (!kernel) mem_free(kernel);
 }
 
 struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
@@ -75,7 +65,42 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     }
     task->status = READY;
 
-    queue_add(task_queue, task);
-
     return task;
 }
+
+int task_destroy (struct task_t * task) {
+    if (!task || (task->status != TERMINATED)) return ERROR;
+
+    if (task->stack_pointer) mem_free(task->stack_pointer);
+
+    return NOERROR;
+}
+
+int task_id (struct task_t * task) {
+    if (!task) {
+        if (!current_task) {
+            ppos_warn("No tasks are available for task ID extraction.\n");
+            return ERROR;
+        }
+        current_task->id;
+    }
+
+    return task->id;
+}
+
+char * task_name (struct task_t * task) {
+    if (!task) {
+        if (!current_task) {
+            ppos_warn("No tasks are available for task name extraction.\n");
+            return NULL;
+        }
+        return current_task->name;
+    }
+
+    return task->name;
+}
+
+void task_yield () {}
+int task_wait (struct task_t * task) {}
+void task_sleep (int t) {}
+void task_exit (int exit_code) {}

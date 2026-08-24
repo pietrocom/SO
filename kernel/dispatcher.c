@@ -4,15 +4,29 @@
 
 // Dispatcher: gerencia os estados das tarefas.
 
-void dispatcher_init()
-{
+// --- Includes ---
+
+#include "tcb.h"
+
+
+// --- Definicoes Externas ---
+
+extern struct task_t; 
+
+
+// --- Variaveis Globais ---
+
+void * usr_main;
+
+
+void dispatcher_init () {}
+
+void dispatcher_term () {}
+
+void dispatcher () {
 }
 
-void dispatcher_term()
-{
-}
+int task_switch (struct task_t * task) {
 
-void dispatcher()
-{
 }
 
