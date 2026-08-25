@@ -29,15 +29,21 @@ void task_init () {
     ids = 0;
 
     kernel = mem_alloc(sizeof(struct task_t));
+    if (!kernel) {
+        ppos_panic("Alocacao do kernel falhou.");
+        return;
+    }
     kernel->id = ids; ids++;
     kernel->name = "kernel";
     kernel->status = READY;
+    kernel->parent = NULL;
+    kernel->stack_pointer = NULL;
 
     current_task = kernel;
 }
 
 void task_term () {
-    if (!kernel) mem_free(kernel);
+    if (kernel) mem_free(kernel);
 }
 
 struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
@@ -53,6 +59,7 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         return NULL;
     }
 
+    task->parent = current_task;
     task->stack_pointer = stack_pointer;
     task->name   = name;
     task->status = NEW;
@@ -69,9 +76,11 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
 }
 
 int task_destroy (struct task_t * task) {
-    if (!task || (task->status != TERMINATED)) return ERROR;
+    // Cuida para nao destruir uma tarefa em execucao
+    if (!task || task == current_task) return ERROR;
 
     if (task->stack_pointer) mem_free(task->stack_pointer);
+    mem_free(task);
 
     return NOERROR;
 }
@@ -79,10 +88,10 @@ int task_destroy (struct task_t * task) {
 int task_id (struct task_t * task) {
     if (!task) {
         if (!current_task) {
-            ppos_warn("No tasks are available for task ID extraction.\n");
+            ppos_warn("Nenhuma task disponivel para retorno do ID.");
             return ERROR;
         }
-        current_task->id;
+        return current_task->id;
     }
 
     return task->id;
@@ -91,7 +100,7 @@ int task_id (struct task_t * task) {
 char * task_name (struct task_t * task) {
     if (!task) {
         if (!current_task) {
-            ppos_warn("No tasks are available for task name extraction.\n");
+            ppos_warn("Nenhuma task disponivel para retorno do nome.");
             return NULL;
         }
         return current_task->name;
@@ -101,6 +110,6 @@ char * task_name (struct task_t * task) {
 }
 
 void task_yield () {}
-int task_wait (struct task_t * task) {}
+int task_wait (struct task_t * task) { return ERROR; }
 void task_sleep (int t) {}
 void task_exit (int exit_code) {}

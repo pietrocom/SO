@@ -7,6 +7,11 @@
 // somente para a implementação trivial
 #include <stdlib.h>
 
+// --- Includes ---
+
+#include "pplibc.h"
+
+
 // implementação trivial, a ser substituída
 void *mem_alloc(int size)
 {

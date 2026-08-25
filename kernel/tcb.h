@@ -9,7 +9,7 @@
 #ifndef __PPOS_TCB__
 #define __PPOS_TCB__
 
-#define STACK_SIZE 32 * 1024
+#define STACK_SIZE (32 * 1024)
 
 #include "ctx.h"
 
@@ -24,11 +24,12 @@ typedef enum {
 // Task Control Block (TCB), infos sobre uma tarefa
 struct task_t
 {
-    int id;                // identificador da tarefa
-    char * name;           // nome da tarefa
-    struct ctx_t context;  // contexto da tarefa
-    Status status;         // pronta, executando, ...
+    int id;                 // identificador da tarefa
+    char * name;            // nome da tarefa
+    struct ctx_t context;   // contexto da tarefa
+    Status status;          // pronta, executando, ...
     void * stack_pointer;
+    struct task_t * parent; // ponteiro para a task que estava executando na hora de sua criacao
 };
 
 #endif
