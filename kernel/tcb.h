@@ -28,7 +28,7 @@ struct task_t
     char * name;            // nome da tarefa
     struct ctx_t context;   // contexto da tarefa
     Status status;          // pronta, executando, ...
-    void * stack_pointer;
+    void * stack_pointer;   // facilita o acesso da stack do ctx
     struct task_t * parent; // ponteiro para a task que estava executando na hora de sua criacao
 };
 

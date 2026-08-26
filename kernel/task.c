@@ -11,7 +11,6 @@
 #include "task.h"
 #include "ctx.h"
 #include "memory.h"
-#include "queue.h"
 #include "macros.h"
 
 
@@ -25,12 +24,12 @@ struct task_t * kernel;        // Task inicial do kernel
 // --- Funcoes da API ---
 
 void task_init () {
-    // Inicializacoes
+    // Inicializacoes das variaveis globais desse arquivo
     ids = 0;
 
     kernel = mem_alloc(sizeof(struct task_t));
     if (!kernel) {
-        ppos_panic("Alocacao do kernel falhou.");
+        ppos_panic("Alocacao do kernel falhou.\n");
         return;
     }
     kernel->id = ids; ids++;
@@ -40,6 +39,8 @@ void task_init () {
     kernel->stack_pointer = NULL;
 
     current_task = kernel;
+
+    ppos_debug("subsystem task initiated\n");
 }
 
 void task_term () {
@@ -72,12 +73,18 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     }
     task->status = READY;
 
+    ppos_debug("task %d (%s) create task %d (%s)\n",
+               current_task->id, current_task->name, task->id, task->name);
+
     return task;
 }
 
 int task_destroy (struct task_t * task) {
     // Cuida para nao destruir uma tarefa em execucao
     if (!task || task == current_task) return ERROR;
+
+    ppos_debug("task %d (%s) destroy task %d (%s)\n",
+               current_task->id, current_task->name, task->id, task->name);
 
     if (task->stack_pointer) mem_free(task->stack_pointer);
     mem_free(task);
@@ -88,7 +95,7 @@ int task_destroy (struct task_t * task) {
 int task_id (struct task_t * task) {
     if (!task) {
         if (!current_task) {
-            ppos_warn("Nenhuma task disponivel para retorno do ID.");
+            ppos_warn("Nenhuma task disponivel para retorno do ID.\n");
             return ERROR;
         }
         return current_task->id;
@@ -100,7 +107,7 @@ int task_id (struct task_t * task) {
 char * task_name (struct task_t * task) {
     if (!task) {
         if (!current_task) {
-            ppos_warn("Nenhuma task disponivel para retorno do nome.");
+            ppos_warn("Nenhuma task disponivel para retorno do nome.\n");
             return NULL;
         }
         return current_task->name;

@@ -28,17 +28,22 @@ void dispatcher_init () {}
 void dispatcher_term () {}
 
 void dispatcher () {
+    ppos_debug("dispatcher started\n");
+
     struct task_t * usr_main_task = task_create("user_main", user_main, NULL);
     if (!usr_main_task) {
-        ppos_panic("Falha ao alocar o user_main.");
+        ppos_panic("Falha ao alocar o user_main.\n");
         return;
     }
 
     task_switch(usr_main_task);
 
+    ppos_debug("dispatcher stopping, no more user tasks\n");
+
     task_destroy(usr_main_task);
 }
 
+// OBS: o status da task provavelmente sera decidido usando outros criterios futuros
 int task_switch (struct task_t * task) {
     if (!current_task) return ERROR;
 
@@ -54,7 +59,7 @@ int task_switch (struct task_t * task) {
 
     struct task_t * prev = current_task;
 
-    ppos_debug("Task %d (%s) switch to task %d (%s)\n",
+    ppos_debug("task %d (%s) switch to task %d (%s)\n",
                prev->id, prev->name, task->id, task->name);
 
     prev->status = SUSPENDED;
