@@ -60,11 +60,14 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         return NULL;
     }
 
+    task->static_prio  = 0; // Prioridade default
+    task->dynamic_prio = 0; // Setado como igual a prioridade estatica
     task->parent = current_task;
     task->stack_pointer = stack_pointer;
     task->name   = name;
     task->status = NEW;
     task->id     = ids; ids++;
+
     if (ctx_create(&task->context, entry, arg, stack_pointer, STACK_SIZE) == -1) {
         mem_free(task);
         mem_free(stack_pointer);

@@ -30,6 +30,8 @@ struct task_t
     Status status;          // pronta, executando, ...
     void * stack_pointer;   // facilita o acesso da stack do ctx
     struct task_t * parent; // ponteiro para a task que estava executando na hora de sua criacao
+    int static_prio;        // prioridade estatica
+    int dynamic_prio;       // prioridade dinamica
 };
 
 #endif
