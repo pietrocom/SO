@@ -12,6 +12,8 @@
 #include "ctx.h"
 #include "memory.h"
 #include "macros.h"
+#include "queue.h"
+#include "dispatcher.h"
 
 
 // --- Variaveis Globais ---
@@ -19,6 +21,12 @@
 static int ids;                // Contador usado para setar os IDs das tasks
 struct task_t * current_task;  // Task que esta sendo executada
 struct task_t * kernel;        // Task inicial do kernel
+
+
+// --- Variaveis Externas ---
+
+extern struct queue_t * ready_queue;
+extern int user_tasks;
 
 
 // --- Funcoes da API ---
@@ -50,6 +58,11 @@ void task_term () {
 struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     if (!entry) return NULL;
 
+    if (!ready_queue) {
+        ppos_panic("Erro ao inserir tarefa na fila de prontas: fila inacessivel.\n");
+        return NULL;
+    }
+
     struct task_t * task = mem_alloc(sizeof(struct task_t));
     if (!task) return NULL;
 
@@ -78,6 +91,16 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
 
     ppos_debug("task %d (%s) create task %d (%s)\n",
                current_task->id, current_task->name, task->id, task->name);
+
+    if (queue_add(ready_queue, task) == ERROR) {
+        mem_free(task);
+        mem_free(stack_pointer);
+
+        ppos_panic("Erro ao inserir tarefa na fila de prontas: queue_add retornou com erro.\n");
+        return NULL;
+    }
+
+    user_tasks++;
 
     return task;
 }
@@ -119,7 +142,37 @@ char * task_name (struct task_t * task) {
     return task->name;
 }
 
-void task_yield () {}
+void task_yield () {
+    if (!current_task) {
+        ppos_panic("Nenhuma tarefa esta rodando.\n");
+        return;
+    }
+
+    current_task->status = READY;
+
+    // Coloca a tarefa atual no fim da lista de prontas
+    int status = queue_add(ready_queue, current_task);
+    if (status == ERROR) {
+        ppos_panic("Erro ao adicionar tarefa a fila.\n");
+        return;
+    }
+
+    // Volta para o dispatcher
+    task_switch(kernel);
+}
+
 int task_wait (struct task_t * task) { return ERROR; }
+
 void task_sleep (int t) {}
-void task_exit (int exit_code) {}
+
+void task_exit (int exit_code) {
+    if (!current_task) {
+        ppos_panic("Erro ao terminar uma tarefa: nenhuma esta rodando.\n");
+        return;
+    }
+
+    current_task->status = TERMINATED;
+
+    // Volta ao dispatcher
+    task_switch(kernel);
+}
