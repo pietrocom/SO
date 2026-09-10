@@ -12,6 +12,7 @@
 #define STACK_SIZE (32 * 1024)
 
 #include "ctx.h"
+#include "queue.h"
 
 typedef enum {
     NEW =        0,
@@ -32,6 +33,7 @@ struct task_t
     struct task_t * parent; // ponteiro para a task que estava executando na hora de sua criacao
     int static_prio;        // prioridade estatica
     int dynamic_prio;       // prioridade dinamica
+    struct queue_t * current_queue; // fila onde esta atualmente ou NULL    
 };
 
 #endif

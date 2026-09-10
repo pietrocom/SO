@@ -45,6 +45,9 @@ void task_init () {
     kernel->status = READY;
     kernel->parent = NULL;
     kernel->stack_pointer = NULL;
+    kernel->current_queue = NULL;
+    kernel->static_prio  = 0;
+    kernel->dynamic_prio = 0;
 
     current_task = kernel;
 
@@ -53,6 +56,7 @@ void task_init () {
 
 void task_term () {
     if (kernel) mem_free(kernel);
+    kernel = NULL;
 }
 
 struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
@@ -99,6 +103,8 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         ppos_panic("Erro ao inserir tarefa na fila de prontas: queue_add retornou com erro.\n");
         return NULL;
     }
+
+    task->current_queue = ready_queue;
 
     user_tasks++;
 
@@ -156,6 +162,8 @@ void task_yield () {
         ppos_panic("Erro ao adicionar tarefa a fila.\n");
         return;
     }
+
+    current_task->current_queue = ready_queue;
 
     // Volta para o dispatcher
     task_switch(kernel);

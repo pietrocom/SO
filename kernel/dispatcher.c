@@ -36,7 +36,7 @@ void dispatcher_init () {
     if (!ready_queue) {
         ready_queue = queue_create();
         if (!ready_queue) {
-            ppos_panic("Erro ao alocar a fila de tarefas porntas.\n");
+            ppos_panic("Erro ao alocar a fila de tarefas prontas.\n");
             return;
         }
     }
@@ -99,7 +99,7 @@ void dispatcher () {
                     break;
             }
         }
-        else ppos_warn("Escalonador nao escolheu uma tarefa.\n");
+        else ppos_panic("Escalonador nao escolheu uma tarefa.\n");
     }
 
     ppos_debug("dispatcher stopping, no more user tasks\n");
@@ -149,6 +149,8 @@ void task_run (struct task_t * task) {
         return;
     }
 
+    task->current_queue = NULL;
+
     task->status = RUNNING;
 
     status = task_switch(task);
@@ -175,6 +177,8 @@ void task_suspend (struct queue_t * queue) {
         }
     }
 
+    current_task->current_queue = queue;
+
     status = task_switch(kernel);
     if (status == ERROR) {
         ppos_panic("Erro na troca de contexto.\n");
@@ -188,9 +192,13 @@ void task_awake (struct task_t * task) {
         return;
     }
 
-    // Se a task estiver em alguma fila, remova-a
-    // Isso tera que ser modificado no futuro
-    if (queue_has(ready_queue, task)) queue_del(ready_queue, task);
+    // Se a task estiver em alguma fila, remove-a
+    if (task->current_queue) {
+        if (queue_del(task->current_queue, task) == ERROR) 
+            ppos_panic("Erro ao remover a tarefa da fila atual.\n");
+
+        task->current_queue = NULL;
+    }
     
     task->status = READY;
 
@@ -199,6 +207,8 @@ void task_awake (struct task_t * task) {
         ppos_panic("Erro ao adicionar task recem-acordada a fila.\n");
         return;
     }
+
+    task->current_queue = ready_queue;
 
     // A tarefa atual continua em execucao
 }
