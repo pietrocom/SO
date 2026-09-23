@@ -41,6 +41,7 @@ void task_init () {
         ppos_panic("Alocacao do kernel falhou.\n");
         return;
     }
+    kernel->type = KERNEL;
     kernel->id = ids; ids++;
     kernel->name = "kernel";
     kernel->status = READY;
@@ -49,6 +50,7 @@ void task_init () {
     kernel->current_queue = NULL;
     kernel->static_prio  = 0;
     kernel->dynamic_prio = 0;
+    kernel->quantum = QUANTUM;
 
     // Tempo nao pode ser registrado pois time_init() ainda nao foi executado
     kernel->time.cpu_activations = 0;
@@ -84,6 +86,7 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         return NULL;
     }
 
+    task->type = USER;
     task->static_prio  = 0; // Prioridade default
     task->dynamic_prio = 0; // Setado como igual a prioridade estatica
     task->parent = current_task;
@@ -96,6 +99,7 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     task->time.cpu_time = 0;
     task->time.current_exec_start_time = 0;
     task->time.initial_time = time();
+    task->quantum = QUANTUM;
 
     if (ctx_create(&task->context, entry, arg, stack_pointer, STACK_SIZE) == -1) {
         mem_free(task);

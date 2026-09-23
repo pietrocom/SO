@@ -17,15 +17,16 @@ extern struct task_t * current_task;
 
 // Funcoes estaticas
 
-static void handle_time () {
+static void handle_time (int irq) {
     cur_time += TICK;
 
-    if (current_task->id == 0) return;
+    if (current_task->type == KERNEL) return;
 
-    current_task->time.cpu_time += TICK;
+    current_task->quantum -= TICK;
     // Se o quantum da tarefa encerrou
-    if (current_task->time.cpu_time == QUANTUM) {
-        task_yield(current_task);
+    if (current_task->quantum <= 0) {
+        current_task->quantum = QUANTUM;
+        task_yield();
     }
 }
 

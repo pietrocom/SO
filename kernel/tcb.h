@@ -15,19 +15,24 @@
 #include "queue.h"
 
 typedef enum {
-    NEW =        0,
-    READY =      1,
-    RUNNING =    2,
-    SUSPENDED =  3,
-    TERMINATED = 4
+    NEW,
+    READY,
+    RUNNING,
+    SUSPENDED,
+    TERMINATED
 } Status;
+
+typedef enum {
+    USER,
+    KERNEL
+} Type;
 
 // Estrutura de dados relativos a temporizacao
 struct time_t {
-    int initial_time;
-    int current_exec_start_time;
-    int cpu_time;
-    int cpu_activations;
+    unsigned int initial_time;
+    unsigned int current_exec_start_time;
+    unsigned int cpu_time;
+    unsigned int cpu_activations;
 };
 
 // Task Control Block (TCB), infos sobre uma tarefa
@@ -43,6 +48,8 @@ struct task_t
     int dynamic_prio;       // prioridade dinamica
     struct queue_t * current_queue; // fila onde esta atualmente ou NULL    
     struct time_t time;     // cuida dos dados de tempo
+    Type type;              // tipo da task (sistema, usuario, etc)
+    int quantum;            // garante o tempo maximo de execucao da tarefa
 };
 
 #endif

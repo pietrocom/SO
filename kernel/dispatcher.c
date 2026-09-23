@@ -31,6 +31,27 @@ extern struct task_t * kernel;
 extern void user_main (void * arg);
 
 
+// --- Funcoes internas ---
+
+// Atualiza os tempos da tarefa sendo interrompida e a sendo ativada.
+// Retorna ERROR ou NOERROR.
+static int task_update_time_values (struct task_t * start_task, struct task_t * finish_task) {
+    if (!start_task || !finish_task) return ERROR;
+
+    // Lida com a tarefa sendo iniciada
+    start_task->time.cpu_activations++;
+    start_task->time.current_exec_start_time = time();
+
+    // Lida com a tarefa sendo interrompida
+    unsigned int start_time = finish_task->time.current_exec_start_time;
+    unsigned int exec_time = time() - start_time;
+    finish_task->time.cpu_time += exec_time;
+    finish_task->time.current_exec_start_time = 0;
+
+    return NOERROR;
+}
+
+
 // --- Funcoes da API ---
 
 void dispatcher_init () {
@@ -122,6 +143,8 @@ int task_switch (struct task_t * task) {
 
     struct task_t * prev = current_task;
 
+    if (task_update_time_values(task, prev) == ERROR) return ERROR;
+
     ppos_debug("task %d (%s) switch to task %d (%s)\n",
                prev->id, prev->name, task->id, task->name);
 
@@ -153,9 +176,6 @@ void task_run (struct task_t * task) {
     task->current_queue = NULL;
 
     task->status = RUNNING;
-
-    task->time.cpu_activations++;
-    task->time.current_exec_start_time = time();
 
     status = task_switch(task);
     if (status == ERROR) {
