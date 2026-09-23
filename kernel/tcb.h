@@ -22,6 +22,14 @@ typedef enum {
     TERMINATED = 4
 } Status;
 
+// Estrutura de dados relativos a temporizacao
+struct time_t {
+    int initial_time;
+    int current_exec_start_time;
+    int cpu_time;
+    int cpu_activations;
+};
+
 // Task Control Block (TCB), infos sobre uma tarefa
 struct task_t
 {
@@ -34,6 +42,7 @@ struct task_t
     int static_prio;        // prioridade estatica
     int dynamic_prio;       // prioridade dinamica
     struct queue_t * current_queue; // fila onde esta atualmente ou NULL    
+    struct time_t time;     // cuida dos dados de tempo
 };
 
 #endif

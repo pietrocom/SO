@@ -15,6 +15,7 @@
 #include "queue.h"
 #include "memory.h"
 #include "scheduler.h"
+#include "time.h"
 
 
 // --- Variaveis Globais ---
