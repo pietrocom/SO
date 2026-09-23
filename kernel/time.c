@@ -6,16 +6,27 @@
 
 #include "time.h"
 #include "hardware/cpu.h"
+#include "tcb.h"
+#include "task.h"
 
 // Variaveis globais
 
 static unsigned int cur_time;   // Current time
+extern struct task_t * current_task;
 
 
 // Funcoes estaticas
 
-static void handle_time() {
-    cur_time++;
+static void handle_time () {
+    cur_time += TICK;
+
+    if (current_task->id == 0) return;
+
+    current_task->time.cpu_time += TICK;
+    // Se o quantum da tarefa encerrou
+    if (current_task->time.cpu_time == QUANTUM) {
+        task_yield(current_task);
+    }
 }
 
 

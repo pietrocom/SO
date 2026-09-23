@@ -154,6 +154,9 @@ void task_run (struct task_t * task) {
 
     task->status = RUNNING;
 
+    task->time.cpu_activations++;
+    task->time.current_exec_start_time = time();
+
     status = task_switch(task);
     if (status == ERROR) {
         ppos_panic("Erro ao colocar a tarefa para rodar.\n");
