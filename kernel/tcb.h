@@ -51,6 +51,7 @@ struct task_t
     Type type;              // tipo da task (sistema, usuario, etc)
     int quantum;            // garante o tempo maximo de execucao da tarefa
     int exit_code;          // codigo de saida da tarefa
+    struct queue_t * waiting_queue; // fila das tarefas que dependem da finalizacao dessa
 };
 
 #endif

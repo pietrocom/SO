@@ -87,6 +87,12 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         return NULL;
     }
 
+    task->waiting_queue = queue_create();
+    if (!task->waiting_queue) {
+        mem_free(stack_pointer);
+        mem_free(task);
+    }
+
     task->type = USER;
     task->static_prio  = 0; // Prioridade default
     task->dynamic_prio = 0; // Setado como igual a prioridade estatica
@@ -137,6 +143,7 @@ int task_destroy (struct task_t * task) {
                current_task->id, current_task->name, task->id, task->name);
 
     if (task->stack_pointer) mem_free(task->stack_pointer);
+    if (task->waiting_queue) queue_destroy(task->waiting_queue);
     mem_free(task);
 
     return NOERROR;
@@ -187,7 +194,13 @@ void task_yield () {
     task_switch(kernel);
 }
 
-int task_wait (struct task_t * task) { return ERROR; }
+int task_wait (struct task_t * task) { 
+    if (!task || task->status == TERMINATED) return ERROR;
+
+    if (task->status != TERMINATED) task_suspend(task->waiting_queue);
+
+    return task->exit_code;
+ }
 
 void task_sleep (int t) {}
 
