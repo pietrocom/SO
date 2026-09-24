@@ -50,13 +50,14 @@ void task_init () {
     kernel->current_queue = NULL;
     kernel->static_prio  = 0;
     kernel->dynamic_prio = 0;
-    kernel->quantum = QUANTUM;
+    kernel->exit_code = 0;
 
     // Tempo nao pode ser registrado pois time_init() ainda nao foi executado
     kernel->time.cpu_activations = 0;
     kernel->time.cpu_time = 0;
     kernel->time.current_exec_start_time = 0;
     kernel->time.initial_time = 0;
+    kernel->quantum = QUANTUM;
 
     current_task = kernel;
 
@@ -94,6 +95,7 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     task->name   = name;
     task->status = NEW;
     task->id     = ids; ids++;
+    task->exit_code = 0;
 
     task->time.cpu_activations = 0;
     task->time.cpu_time = 0;
@@ -196,6 +198,7 @@ void task_exit (int exit_code) {
     }
 
     current_task->status = TERMINATED;
+    current_task->exit_code = exit_code;
 
     // Volta ao dispatcher
     task_switch(kernel);

@@ -51,6 +51,14 @@ static int task_update_time_values (struct task_t * start_task, struct task_t * 
     return NOERROR;
 }
 
+static void task_print_final_specs (struct task_t * task) {
+    unsigned int task_total_time = time() - task->time.initial_time;
+    printk("PPOS: task %3d (%s), %5u ms run, %5u ms cpu, %5u acts, exit code %3d\n", 
+            task->id, task->name, 
+            task_total_time, task->time.cpu_time, 
+            task->time.cpu_activations, task->exit_code);
+}
+
 
 // --- Funcoes da API ---
 
@@ -113,6 +121,7 @@ void dispatcher () {
 
                 case TERMINATED:
                     // Task user main sera terminada e destruida aqui
+                    task_print_final_specs(next_task);
                     task_destroy(next_task);
                     user_tasks--;
                     break;
@@ -123,6 +132,8 @@ void dispatcher () {
         }
         else ppos_panic("Escalonador nao escolheu uma tarefa.\n");
     }
+
+    task_print_final_specs(kernel);
 
     ppos_debug("dispatcher stopping, no more user tasks\n");
 }

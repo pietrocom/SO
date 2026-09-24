@@ -50,6 +50,7 @@ struct task_t
     struct time_t time;     // cuida dos dados de tempo
     Type type;              // tipo da task (sistema, usuario, etc)
     int quantum;            // garante o tempo maximo de execucao da tarefa
+    int exit_code;          // codigo de saida da tarefa
 };
 
 #endif

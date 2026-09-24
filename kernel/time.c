@@ -21,6 +21,7 @@ static void handle_time (int irq) {
     cur_time += TICK;
 
     if (current_task->type == KERNEL) return;
+    if (current_task->status != RUNNING) return;
 
     current_task->quantum -= TICK;
     // Se o quantum da tarefa encerrou
@@ -44,6 +45,7 @@ void time_init() {
 
 void time_term() {
     hw_timer(0, 0);     // Desarma o timer
+    hw_irq_enable(0);   // Desabilita IRQs
 }
 
 unsigned int time()
