@@ -4,6 +4,8 @@
 
 // Semáforos e spinlocks
 
+// Autor: Pietro Comin [GRR20241955]
+
 void sem_init()
 {
 }

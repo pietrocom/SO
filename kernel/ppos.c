@@ -7,6 +7,8 @@
 
 // Funções iniciais do PPOS
 
+// Autor: Pietro Comin [GRR20241955]
+
 #include "hardware/cpu.h"
 #include "lib/pplibc.h"
 #include "ppos.h"

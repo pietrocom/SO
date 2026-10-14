@@ -6,6 +6,8 @@
 
 // Descritor de tarefas (TCB - Task Control Block).
 
+// Autor: Pietro Comin [GRR20241955]
+
 #ifndef __PPOS_TCB__
 #define __PPOS_TCB__
 
@@ -33,6 +35,7 @@ struct time_t {
     unsigned int current_exec_start_time;
     unsigned int cpu_time;
     unsigned int cpu_activations;
+    unsigned int awake_time;
 };
 
 // Task Control Block (TCB), infos sobre uma tarefa

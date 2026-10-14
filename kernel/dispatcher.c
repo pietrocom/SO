@@ -4,6 +4,8 @@
 
 // Dispatcher: gerencia os estados das tarefas.
 
+// Autor: Pietro Comin [GRR20241955]
+
 // --- Includes ---
 
 #include "tcb.h"
@@ -21,6 +23,7 @@
 // --- Variaveis Globais ---
 
 struct queue_t * ready_queue;
+struct queue_t * sleeping_tasks_queue;
 int user_tasks;
 
 
@@ -29,6 +32,7 @@ int user_tasks;
 extern struct task_t * current_task;
 extern struct task_t * kernel;
 extern void user_main (void * arg);
+extern int preemption_enabled;
 
 
 // --- Funcoes internas ---
@@ -59,6 +63,20 @@ static void task_print_final_specs (struct task_t * task) {
             task->time.cpu_activations, task->exit_code);
 }
 
+// Percorre a fila de adormecidas e acorda as tarefas cujo tempo de sleep terminou
+static void wake_sleeping_tasks () {
+    unsigned int now = time();
+
+    struct task_t * task = queue_head(sleeping_tasks_queue);
+    while (task) {
+        if (task->time.awake_time <= now) {
+            // queue_del ja avanca o iterador
+            task_awake(task);
+            task = queue_item(sleeping_tasks_queue);
+        }
+        else task = queue_next(sleeping_tasks_queue);
+    }
+}
 
 // --- Funcoes da API ---
 
@@ -67,6 +85,14 @@ void dispatcher_init () {
         ready_queue = queue_create();
         if (!ready_queue) {
             ppos_panic("Erro ao alocar a fila de tarefas prontas.\n");
+            return;
+        }
+    }
+
+    if (!sleeping_tasks_queue) {
+        sleeping_tasks_queue = queue_create();
+        if (!sleeping_tasks_queue) {
+            ppos_panic("Erro ao alocar a fila de tarefas adormecidas.\n");
             return;
         }
     }
@@ -86,6 +112,9 @@ void dispatcher_term () {
         return;
     }
 
+    queue_destroy(sleeping_tasks_queue);
+    sleeping_tasks_queue = NULL;
+
     queue_destroy(ready_queue);
     ready_queue = NULL;
 }
@@ -100,9 +129,16 @@ void dispatcher () {
     }
 
     while (user_tasks > 0) {
+        // Acorda as tarefas que ja dormiram o tempo pedido
+        wake_sleeping_tasks();
+
+        // Todas as tarefas podem estar dormindo
+        if (queue_size(ready_queue) == 0) continue;
+
         struct task_t * next_task = scheduler(ready_queue);
 
         if (next_task) {
+            preemption_enabled = 1; // Garante que a prox tarefa rode corretamente
             task_run(next_task);
 
             switch (next_task->status) {
@@ -120,9 +156,10 @@ void dispatcher () {
                     break;
 
                 case TERMINATED:
+                    // As demais tarefas sao destruidas por quem as criou (task_destroy)
                     // Task user main sera terminada e destruida aqui
                     task_print_final_specs(next_task);
-                    task_destroy(next_task);
+                    if (next_task == user_main_task) task_destroy(next_task);
                     user_tasks--;
                     break;
                 
