@@ -24,8 +24,9 @@ static void handle_time (int irq) {
     if (current_task->status != RUNNING) return;
 
     current_task->quantum -= TICK;
-    // Se o quantum da tarefa encerrou
-    if (current_task->quantum <= 0) {
+    // Se o quantum da tarefa encerrou; se ela mantem algum spinlock,
+    // a preempcao fica adiada para o proximo tick apos liberar a trava
+    if (current_task->quantum <= 0 && current_task->lock_count == 0) {
         current_task->quantum = QUANTUM;
         task_yield();
     }

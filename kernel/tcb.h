@@ -51,6 +51,8 @@ struct task_t
     Type type;              // tipo da task (sistema, usuario, etc)
     int quantum;            // garante o tempo maximo de execucao da tarefa
     int exit_code;          // codigo de saida da tarefa
+    int lock_count;         // spinlocks mantidos (> 0 adia a preempcao)
+    int wait_result;        // resultado da ultima espera (NOERROR ou ERROR)
 };
 
 #endif

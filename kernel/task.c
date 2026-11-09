@@ -51,6 +51,8 @@ void task_init () {
     kernel->static_prio  = 0;
     kernel->dynamic_prio = 0;
     kernel->exit_code = 0;
+    kernel->lock_count = 0;
+    kernel->wait_result = NOERROR;
 
     // Tempo nao pode ser registrado pois time_init() ainda nao foi executado
     kernel->time.cpu_activations = 0;
@@ -96,6 +98,8 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     task->status = NEW;
     task->id     = ids; ids++;
     task->exit_code = 0;
+    task->lock_count = 0;
+    task->wait_result = NOERROR;
 
     task->time.cpu_activations = 0;
     task->time.cpu_time = 0;
