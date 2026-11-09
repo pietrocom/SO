@@ -4,6 +4,8 @@
 
 // Alocador básico de memória heap.
 
+// Autor: Pietro Comin [GRR20241955]
+
 // somente para a implementação trivial
 #include <stdlib.h>
 

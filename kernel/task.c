@@ -4,6 +4,8 @@
 
 // Gerência básica de tarefas.
 
+// Autor: Pietro Comin [GRR20241955]
+
 
 // --- Includes ---
 
@@ -26,7 +28,9 @@ struct task_t * kernel;        // Task inicial do kernel
 
 // --- Variaveis Externas ---
 
+extern int preemption_enabled;
 extern struct queue_t * ready_queue;
+extern struct queue_t * sleeping_tasks_queue;
 extern int user_tasks;
 
 
@@ -51,14 +55,16 @@ void task_init () {
     kernel->static_prio  = 0;
     kernel->dynamic_prio = 0;
     kernel->exit_code = 0;
+    kernel->waiting_queue = NULL;   // Nenhuma tarefa espera o kernel
     kernel->lock_count = 0;
     kernel->wait_result = NOERROR;
 
     // Tempo nao pode ser registrado pois time_init() ainda nao foi executado
-    kernel->time.cpu_activations = 0;
+    kernel->time.cpu_activations = 1;
     kernel->time.cpu_time = 0;
     kernel->time.current_exec_start_time = 0;
     kernel->time.initial_time = 0;
+    kernel->time.awake_time = 0;
     kernel->quantum = QUANTUM;
 
     current_task = kernel;
@@ -89,6 +95,14 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
         return NULL;
     }
 
+    task->waiting_queue = queue_create();
+    if (!task->waiting_queue) {
+        mem_free(stack_pointer);
+        mem_free(task);
+
+        return NULL;
+    }
+
     task->type = USER;
     task->static_prio  = 0; // Prioridade default
     task->dynamic_prio = 0; // Setado como igual a prioridade estatica
@@ -105,9 +119,11 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     task->time.cpu_time = 0;
     task->time.current_exec_start_time = 0;
     task->time.initial_time = time();
+    task->time.awake_time = 0;      // Sera redefinido em task_sleep
     task->quantum = QUANTUM;
 
     if (ctx_create(&task->context, entry, arg, stack_pointer, STACK_SIZE) == -1) {
+        queue_destroy(task->waiting_queue);
         mem_free(task);
         mem_free(stack_pointer);
         
@@ -119,6 +135,7 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
                current_task->id, current_task->name, task->id, task->name);
 
     if (queue_add(ready_queue, task) == ERROR) {
+        queue_destroy(task->waiting_queue);
         mem_free(task);
         mem_free(stack_pointer);
 
@@ -137,10 +154,14 @@ int task_destroy (struct task_t * task) {
     // Cuida para nao destruir uma tarefa em execucao
     if (!task || task == current_task) return ERROR;
 
+    // Somente tarefas terminadas podem ser destruidas
+    if (task->status != TERMINATED) return ERROR;
+
     ppos_debug("task %d (%s) destroy task %d (%s)\n",
                current_task->id, current_task->name, task->id, task->name);
 
     if (task->stack_pointer) mem_free(task->stack_pointer);
+    if (task->waiting_queue) queue_destroy(task->waiting_queue);
     mem_free(task);
 
     return NOERROR;
@@ -191,9 +212,35 @@ void task_yield () {
     task_switch(kernel);
 }
 
-int task_wait (struct task_t * task) { return ERROR; }
+int task_wait (struct task_t * task) {
+    // Uma tarefa nao pode esperar por si mesma
+    if (!task || task == current_task) return ERROR;
 
-void task_sleep (int t) {}
+    // Se a tarefa ainda nao terminou, suspende ate ser acordada por task_exit
+    if (task->status != TERMINATED) task_suspend(task->waiting_queue);
+
+    return task->exit_code;
+}
+
+void task_sleep (int t) {
+    if (!sleeping_tasks_queue) 
+        ppos_panic("A fila de tarefas adormecidas nao pode ser acessada.\n");
+
+    if (t < 0) {
+        ppos_warn("Tentativa de colocar uma tarefa para dormir por tempo indefinido.\n");
+        return;
+    }
+
+    if (t == 0) return;
+
+    unsigned int awake_time = time() + (unsigned int)t;
+
+    current_task->time.awake_time = awake_time;
+
+    preemption_enabled = 0;
+    task_suspend(sleeping_tasks_queue);
+    preemption_enabled = 1;
+}
 
 void task_exit (int exit_code) {
     if (!current_task) {
@@ -203,6 +250,14 @@ void task_exit (int exit_code) {
 
     current_task->status = TERMINATED;
     current_task->exit_code = exit_code;
+
+    // Acorda todas as tarefas que esperavam o fim desta
+    // task_awake ja remove a tarefa da fila de espera
+    if (current_task->waiting_queue) {
+        struct task_t * waiting_task;
+        while ((waiting_task = queue_head(current_task->waiting_queue)))
+            task_awake(waiting_task);
+    }
 
     // Volta ao dispatcher
     task_switch(kernel);

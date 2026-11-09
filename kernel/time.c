@@ -4,6 +4,8 @@
 
 // Gerência básica do tempo.
 
+// Autor: Pietro Comin [GRR20241955]
+
 #include "time.h"
 #include "hardware/cpu.h"
 #include "tcb.h"
@@ -13,6 +15,7 @@
 
 static unsigned int cur_time;   // Current time
 extern struct task_t * current_task;
+int preemption_enabled = 1;     // Se 0, o tratador de ticks nao troca de tarefa
 
 
 // Funcoes estaticas
@@ -24,9 +27,10 @@ static void handle_time (int irq) {
     if (current_task->status != RUNNING) return;
 
     current_task->quantum -= TICK;
-    // Se o quantum da tarefa encerrou; se ela mantem algum spinlock,
-    // a preempcao fica adiada para o proximo tick apos liberar a trava
-    if (current_task->quantum <= 0 && current_task->lock_count == 0) {
+    // Se o quantum da tarefa encerrou; a preempcao fica adiada se estiver
+    // desabilitada ou se a tarefa mantem algum spinlock (ate liberar a trava)
+    if (current_task->quantum <= 0 && preemption_enabled &&
+        current_task->lock_count == 0) {
         current_task->quantum = QUANTUM;
         task_yield();
     }

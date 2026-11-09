@@ -6,6 +6,8 @@
 
 // Descritor de tarefas (TCB - Task Control Block).
 
+// Autor: Pietro Comin [GRR20241955]
+
 #ifndef __PPOS_TCB__
 #define __PPOS_TCB__
 
@@ -33,6 +35,7 @@ struct time_t {
     unsigned int current_exec_start_time;
     unsigned int cpu_time;
     unsigned int cpu_activations;
+    unsigned int awake_time;
 };
 
 // Task Control Block (TCB), infos sobre uma tarefa
@@ -51,6 +54,7 @@ struct task_t
     Type type;              // tipo da task (sistema, usuario, etc)
     int quantum;            // garante o tempo maximo de execucao da tarefa
     int exit_code;          // codigo de saida da tarefa
+    struct queue_t * waiting_queue; // fila das tarefas que dependem da finalizacao dessa
     int lock_count;         // spinlocks mantidos (> 0 adia a preempcao)
     int wait_result;        // resultado da ultima espera (NOERROR ou ERROR)
 };

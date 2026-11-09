@@ -4,6 +4,8 @@
 
 // Escalonador de tarefas prontas.
 
+// Autor: Pietro Comin [GRR20241955]
+
 // --- Includes ---
 
 #include "scheduler.h"
