@@ -29,7 +29,7 @@ static void handle_time (int irq) {
 
     current_task->quantum -= TICK;
     // Se o quantum da tarefa encerrou; a preempcao fica adiada se estiver
-    // desabilitada ou se a tarefa mantem algum spinlock (ate liberar a trava)
+    // desabilitada ou se a tarefa mantem algum spinlock 
     if (current_task->quantum <= 0 && preemption_enabled &&
         current_task->lock_count == 0) {
         current_task->quantum = QUANTUM;
@@ -38,7 +38,7 @@ static void handle_time (int irq) {
 }
 
 
-// Funcoes da API
+// --- Funcoes da API ---
 
 void time_init() {
     cur_time = 0;

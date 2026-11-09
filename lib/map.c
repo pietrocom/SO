@@ -6,6 +6,8 @@
 
 // Implementação do TAD Mapa de objetos
 
+// Autor: Pietro Comin [GRR20241955]
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "map.h"

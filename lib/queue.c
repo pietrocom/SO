@@ -6,6 +6,8 @@
 
 // Implementação do TAD fila genérica
 
+// Autor: Pietro Comin [GRR20241955]
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "queue.h"
