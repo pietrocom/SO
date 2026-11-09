@@ -57,6 +57,7 @@ struct task_t
     struct queue_t * waiting_queue; // fila das tarefas que dependem da finalizacao dessa
     int lock_count;         // spinlocks mantidos (> 0 adia a preempcao)
     int wait_result;        // resultado da ultima espera (NOERROR ou ERROR)
+    void * wait_msg;        // buffer da operacao bloqueada em fila de mensagens
 };
 
 #endif

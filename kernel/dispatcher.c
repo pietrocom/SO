@@ -225,6 +225,10 @@ void task_run (struct task_t * task) {
 
     task->status = RUNNING;
 
+    // Quantum cheio a cada ativacao: um tick na janela da troca de contexto
+    // (current_task ja trocado, ctx_switch ainda nao feito) nao o esgota
+    task->quantum = QUANTUM;
+
     status = task_switch(task);
     if (status == ERROR) {
         ppos_panic("Erro ao colocar a tarefa para rodar.\n");

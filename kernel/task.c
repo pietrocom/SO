@@ -58,6 +58,7 @@ void task_init () {
     kernel->waiting_queue = NULL;   // Nenhuma tarefa espera o kernel
     kernel->lock_count = 0;
     kernel->wait_result = NOERROR;
+    kernel->wait_msg = NULL;
 
     // Tempo nao pode ser registrado pois time_init() ainda nao foi executado
     kernel->time.cpu_activations = 1;
@@ -75,6 +76,7 @@ void task_init () {
 void task_term () {
     if (kernel) mem_free(kernel);
     kernel = NULL;
+    current_task = NULL;    // evita acesso ao TCB liberado por IRQs tardias
 }
 
 struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
@@ -114,6 +116,7 @@ struct task_t * task_create (char * name, void (* entry)(void *), void * arg) {
     task->exit_code = 0;
     task->lock_count = 0;
     task->wait_result = NOERROR;
+    task->wait_msg = NULL;
 
     task->time.cpu_activations = 0;
     task->time.cpu_time = 0;

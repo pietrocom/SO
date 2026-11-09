@@ -23,6 +23,7 @@ int preemption_enabled = 1;     // Se 0, o tratador de ticks nao troca de tarefa
 static void handle_time (int irq) {
     cur_time += TICK;
 
+    if (!current_task) return;
     if (current_task->type == KERNEL) return;
     if (current_task->status != RUNNING) return;
 
